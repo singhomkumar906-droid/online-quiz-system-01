@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login | QUIZCORE</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body { margin: 0; min-height: 100vh; background: #050505; color: white;
+               font-family: Arial, sans-serif; display: flex;
+               justify-content: center; align-items: center; }
+        .login-page { width: 100%; max-width: 430px; padding: 20px; box-sizing: border-box; }
+        .login-box { background: #090909; border: 1px solid #00f6ff; border-radius: 15px;
+                     padding: 35px;
+                     box-shadow: 0 0 25px rgba(0,246,255,.25), inset 0 0 20px rgba(0,246,255,.04); }
+        .login-title { text-align: center; margin-bottom: 30px; }
+        .login-title h1 { color: #00f6ff; letter-spacing: 3px; margin: 0 0 8px; }
+        .login-title p { color: #888; margin: 0; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #00f6ff; margin-bottom: 8px; font-weight: bold; }
+        .form-group input { width: 100%; box-sizing: border-box; padding: 13px;
+                            background: #050505; color: white; border: 1px solid #333;
+                            border-radius: 8px; outline: none; }
+        .form-group input:focus { border-color: #00f6ff; box-shadow: 0 0 10px rgba(0,246,255,.3); }
+        .login-btn { width: 100%; padding: 14px; background: transparent; color: #00f6ff;
+                     border: 1px solid #00f6ff; border-radius: 8px; font-weight: bold;
+                     cursor: pointer; transition: .3s; }
+        .login-btn:hover { background: #00f6ff; color: #000; box-shadow: 0 0 20px #00f6ff; }
+        .message { text-align: center; margin-top: 15px; font-size: 14px; min-height: 18px; }
+        .links { display: flex; justify-content: space-between; margin-top: 20px; }
+        .links a { color: #888; text-decoration: none; font-size: 14px; }
+        .links a:hover { color: #00f6ff; }
+    </style>
+</head>
+
+<body>
+<div class="login-page">
+    <div class="login-box">
+
+        <div class="login-title">
+            <h1>QUIZCORE</h1>
+            <p>STUDENT LOGIN</p>
+        </div>
+
+        <form id="studentLoginForm">
+            <div class="form-group">
+                <label for="identifier">Email or Roll Number</label>
+                <input type="text" id="identifier" placeholder="Enter email or roll number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="login-btn">LOGIN</button>
+            <div id="message" class="message"></div>
+        </form>
+
+        <div class="links">
+            <a href="index.html">← Back to Home</a>
+            <a href="register.html">New? Register</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.getElementById("studentLoginForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const identifier = document.getElementById("identifier").value.trim().toLowerCase();
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("message");
+
+    function fail(text) {
+        message.style.color = "#ff4d4d";
+        message.textContent = text;
+    }
+
+    let students = [];
+    try { students = JSON.parse(localStorage.getItem("students") || "[]"); }
+    catch (e) { students = []; }
+
+    function matches(s) {
+        return String(s.email || "").toLowerCase() === identifier ||
+               String(s.rollNo || "").toLowerCase() === identifier;
+    }
+
+    let student = students.find(matches);
+
+    // Purani registration (bina password wali) ke liye
+    if (!student) {
+        try {
+            const old = JSON.parse(localStorage.getItem("quizStudent") || "null");
+            if (old && matches(old) && !old.password) student = old;
+        } catch (e) {}
+    }
+
+    if (!student) { fail("Account not found. Please register first."); return; }
+    if (student.password && student.password !== password) { fail("Wrong password. Please try again."); return; }
+
+    const sessionStudent = Object.assign({}, student);
+    delete sessionStudent.password;
+
+    localStorage.setItem("quizStudent", JSON.stringify(sessionStudent));
+    localStorage.setItem("quizLoggedIn", "true");
+
+    message.style.color = "#00ff88";
+    message.textContent = "Login successful! Redirecting...";
+
+    setTimeout(function () { window.location.href = "quiz.html"; }, 700);
+});
+</script>
+</body>
+</html>
